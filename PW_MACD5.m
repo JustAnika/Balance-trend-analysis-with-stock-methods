@@ -83,16 +83,16 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c)
     MACD = EMA12 - EMA26;
     SIGNAL_LINE = movavg(MACD,'exponential',c); %9
      
-    h1 = figure(701);  
-    plot(time,signal,'b',time,MACD+signal(1),'r', time,SIGNAL_LINE+signal(1),'g');
-    hold on     
+    % h1 = figure(701);  
+    % plot(time,signal,'b',time,MACD+signal(1),'r', time,SIGNAL_LINE+signal(1),'g');
+    % hold on     
    
     temp=SIGNAL_LINE>=MACD;
     MACD_CROSS = abs(diff(temp)); 
     w=find(MACD_CROSS==1);    
     
-    plot(time(w),signal(w),'o');
-    hold off
+    % plot(time(w),signal(w),'o');
+    % hold off
     nazwaS = nazwa(1:end);
     if sImage==1
         saveas(h1,fullfile(pathOUT, ['sig_' nazwaS '.jpg']));
@@ -120,9 +120,13 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c)
     wyn.std_TCI_dV_mm_s = WYNstdV;
     wyn.std_TCI_dS_mm = WYNstdD;
     wyn.std_TCI_dT_s = WYNstd;   
+
+    wyn.w=w;
+    wyn.time=time;
+    wyn.signal=signal;
        
-    h2 = figure(702);  
-    plot(Roznica);
+    % h2 = figure(702);  
+    % plot(Roznica);
     if sImage==1 
         saveas(h2,fullfile(pathOUT, ['diff_' nazwaS '.jpg']));
     end
