@@ -1,5 +1,5 @@
 % 4_4_2023
-% [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated)
+% [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated, a, b, c)
 
 % time,sig_AP,sig_ML - wektory w formie 1 kolumny
 % wartość sygnałów jest w mm, czas w s
@@ -8,13 +8,16 @@
 % sImage - czy zapisywać pliki jpg 0 lub 1
 % pathOUT - ścieżka wynikowa dla jpg
 % filtrActivated - aktywcacja filtra FDP 0 lub 1
+% a - długość pierwszej średniej kroczacej (>0 i całkowita)
+% b - długość drugiej średniej kroczacej (>0 i całkowita)
+% c - długość trzeciej średniej kroczacej (>0 i całkowita)
 
 % Prawidłowe obliczenia tylko jeżeli sygnał jest przefiltrowany
 
 % 4_4_2023 funkcja MACD5 jest dwuwymiarowa oraz zwraca wyniki dla AP, ML i
 % wypadkowe i przefiltrowane filtfilt
 
-function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated)
+function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated, a, b, c)
 
 
     if ~exist('nazwa','var')
@@ -50,8 +53,8 @@ function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
         end        
     end
 
-    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT);
-    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT);
+    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a,b,c);
+    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a,b,c);
        
     r.resultant.TCI_dV_mm_s = sqrt((r.AP.TCI_dV_mm_s^2) + (r.ML.TCI_dV_mm_s^2));
     r.resultant.TCI_dS_mm = sqrt((r.AP.TCI_dS_mm^2) + (r.ML.TCI_dS_mm^2));
@@ -73,12 +76,12 @@ function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
     
 end
 
-function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT)
+function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c)
     
-    EMA12 = movavg(signal,'exponential',12);
-    EMA26= movavg(signal,'exponential',26);
+    EMA12 = movavg(signal,'exponential',a); %12
+    EMA26= movavg(signal,'exponential',b); %26
     MACD = EMA12 - EMA26;
-    SIGNAL_LINE = movavg(MACD,'exponential',9);
+    SIGNAL_LINE = movavg(MACD,'exponential',c); %9
      
     h1 = figure(701);  
     plot(time,signal,'b',time,MACD+signal(1),'r', time,SIGNAL_LINE+signal(1),'g');
