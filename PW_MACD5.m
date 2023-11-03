@@ -11,13 +11,15 @@
 % a - długość pierwszej średniej kroczacej (>0 i całkowita)
 % b - długość drugiej średniej kroczacej (>0 i całkowita)
 % c - długość trzeciej średniej kroczacej (>0 i całkowita)
+% hist_step - krok w "kubełkach" histogramu (>0.01)
+% hist_max_edge - maksymalna wartość granicy "kubełka" w histogramie (>1)
 
 % Prawidłowe obliczenia tylko jeżeli sygnał jest przefiltrowany
 
 % 4_4_2023 funkcja MACD5 jest dwuwymiarowa oraz zwraca wyniki dla AP, ML i
 % wypadkowe i przefiltrowane filtfilt
 
-function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated, a, b, c)
+function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filtrActivated, a, b, c, hist_step, hist_max_edge)
 
 
     if ~exist('nazwa','var')
@@ -53,8 +55,8 @@ function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
         end        
     end
 
-    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a,b,c);
-    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a,b,c);
+    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a,b,c,hist_step, hist_max_edge);
+    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a,b,c,hist_step, hist_max_edge);
        
     r.resultant.TCI_dV_mm_s = sqrt((r.AP.TCI_dV_mm_s^2) + (r.ML.TCI_dV_mm_s^2));
     r.resultant.TCI_dS_mm = sqrt((r.AP.TCI_dS_mm^2) + (r.ML.TCI_dS_mm^2));
@@ -64,8 +66,12 @@ function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
     r.resultant.std_TCI_dT_s = sqrt((r.AP.std_TCI_dT_s^2) + (r.ML.std_TCI_dT_s^2));
 
     r.resultant.TCI_j = r.AP.TCI_j + r.ML.TCI_j;
+
     r.resultant.histogram = r.AP.histogram + r.ML.histogram;
     r.resultant.t_hist = r.AP.t_hist;
+    figure();
+    disp_t_hist=r.resultant.t_hist(2:end);
+    bar(disp_t_hist,r.resultant.histogram,'histc','b');
 
     r.info.author = "Piotr Wodarski and Jacek Jurkojć";
     r.info.version = "5.1";
@@ -76,7 +82,7 @@ function [r] = PW_MACD5(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
     
 end
 
-function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c)
+function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c,hist_step, hist_max_edge)
     
     EMA12 = movavg(signal,'exponential',a); %12
     EMA26= movavg(signal,'exponential',b); %26
@@ -130,7 +136,8 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a,b,c)
     if sImage==1 
         saveas(h2,fullfile(pathOUT, ['diff_' nazwaS '.jpg']));
     end
-    tHist = [0:0.1:2];
+    tHist = 0:hist_step:hist_max_edge; %0:0.1:2
+    figure();
     h=histogram(Roznica, tHist);
     if sImage==1 
         saveas(h,fullfile(pathOUT, ['his_' nazwaS '.jpg']));
