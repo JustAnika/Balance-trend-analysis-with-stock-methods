@@ -55,8 +55,8 @@ function [r] = PW_MACD6(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
         end        
     end
 
-    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a, b, c, hist_step, hist_max_edge);
-    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a, b, c, hist_step, hist_max_edge);
+    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a, b, c, hist_step, hist_max_edge,"AP");
+    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a, b, c, hist_step, hist_max_edge,"ML");
        
     r.resultant.TCI_dV_mm_s = sqrt((r.AP.TCI_dV_mm_s^2) + (r.ML.TCI_dV_mm_s^2));
     r.resultant.TCI_dS_mm = sqrt((r.AP.TCI_dS_mm^2) + (r.ML.TCI_dS_mm^2));
@@ -71,7 +71,7 @@ function [r] = PW_MACD6(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
     r.resultant.t_hist = r.AP.t_hist;
     figure();
     disp_t_hist=r.resultant.t_hist(2:end);
-    bar(disp_t_hist,r.resultant.histogram,'histc','b');
+    bar(disp_t_hist,r.resultant.histogram,'histc');
 
     r.info.author = "Piotr Wodarski and Jacek Jurkojć";
     r.info.version = "6.0";
@@ -82,7 +82,7 @@ function [r] = PW_MACD6(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
     
 end
 
-function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a, b, c, hist_step, hist_max_edge)
+function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a, b, c, hist_step, hist_max_edge,name)
     
     EMA12 = movavg(signal,'exponential',a); % 12
     EMA26= movavg(signal,'exponential',b); %26
@@ -137,7 +137,9 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a, b, c, hi
         saveas(h2,fullfile(pathOUT, ['diff_' nazwaS '.jpg']));
     end
     tHist = 0:hist_step:hist_max_edge; %0:0.1:2
+    figure();
     h=histogram(Roznica, tHist);
+    title("Histogram "+name);
     if sImage==1 
         saveas(h,fullfile(pathOUT, ['his_' nazwaS '.jpg']));
     end
