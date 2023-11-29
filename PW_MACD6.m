@@ -55,8 +55,8 @@ function [r] = PW_MACD6(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
         end        
     end
 
-    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a, b, c, hist_step, hist_max_edge,"AP");
-    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a, b, c, hist_step, hist_max_edge,"ML");
+    r.AP = PW_MACD3hidden(time, signal_AP2, nazwa, [sImage '_AP'], pathOUT,a, b, c, hist_step, hist_max_edge," Y");
+    r.ML = PW_MACD3hidden(time, signal_ML2, nazwa, [sImage '_ML'], pathOUT,a, b, c, hist_step, hist_max_edge," X");
        
     r.resultant.TCI_dV_mm_s = sqrt((r.AP.TCI_dV_mm_s^2) + (r.ML.TCI_dV_mm_s^2));
     r.resultant.TCI_dS_mm = sqrt((r.AP.TCI_dS_mm^2) + (r.ML.TCI_dS_mm^2));
@@ -67,11 +67,12 @@ function [r] = PW_MACD6(time, signal_AP, signal_ML, nazwa, sImage, pathOUT, filt
 
     r.resultant.TCI_j = r.AP.TCI_j + r.ML.TCI_j;
     r.resultant.TCI_j_per_s = (r.AP.TCI_j + r.ML.TCI_j)/(time(end)-time(1)); %nowe
-    r.resultant.histogram = r.AP.histogram + r.ML.histogram;
+    %r.resultant.histogram = r.AP.histogram + r.ML.histogram;
+    r.resultant.histcounts = r.AP.histcountsN + r.ML.histcountsN;
     r.resultant.t_hist = r.AP.t_hist;
-    figure();
-    disp_t_hist=r.resultant.t_hist(2:end);
-    bar(disp_t_hist,r.resultant.histogram,'histc');
+    %figure();
+    %disp_t_hist=r.resultant.t_hist(2:end);
+    %bar(disp_t_hist,r.resultant.histogram,'histc');
 
     r.info.author = "Piotr Wodarski and Jacek Jurkojć";
     r.info.version = "6.0";
@@ -89,16 +90,16 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a, b, c, hi
     MACD = EMA12 - EMA26;
     SIGNAL_LINE = movavg(MACD,'exponential',c); %9
      
-    h1 = figure(701);  
-    plot(time,signal,'b',time,MACD+signal(1),'r', time,SIGNAL_LINE+signal(1),'g');
-    hold on     
+    % h1 = figure(701);  
+    % plot(time,signal,'b',time,MACD+signal(1),'r', time,SIGNAL_LINE+signal(1),'g');
+    % hold on     
    
     temp=SIGNAL_LINE>=MACD;
     MACD_CROSS = abs(diff(temp)); 
     w=find(MACD_CROSS==1);    
     
-    plot(time(w),signal(w),'o');
-    hold off
+    % plot(time(w),signal(w),'o');
+    % hold off
     nazwaS = nazwa(1:end);
     if sImage==1
         saveas(h1,fullfile(pathOUT, ['sig_' nazwaS '.jpg']));
@@ -131,24 +132,25 @@ function [wyn] = PW_MACD3hidden(time, signal, nazwa, sImage, pathOUT,a, b, c, hi
     wyn.time=time;
     wyn.signal=signal;
        
-    h2 = figure(702);  
-    plot(Roznica);
+    % h2 = figure(702);  
+    % plot(Roznica);
     if sImage==1 
         saveas(h2,fullfile(pathOUT, ['diff_' nazwaS '.jpg']));
     end
     tHist = 0:hist_step:hist_max_edge; %0:0.1:2
-    figure();
-    h=histogram(Roznica, tHist);
-    title("Histogram "+name);
+    %figure();
+    % h=histogram(Roznica, tHist);
+    %title("Histogram "+name);
     if sImage==1 
         saveas(h,fullfile(pathOUT, ['his_' nazwaS '.jpg']));
     end
-    histogramN = h.Values;
-    WYN_S  = sum(h.Values);
-    
+    % histogramN = h.Values;
+    wyn.histcountsN=histcounts(Roznica,tHist);
+    WYN_S  = sum(wyn.histcountsN);%sum(h.Values);
+
     wyn.TCI_j = WYN_S;
     wyn.TCI_j_per_s = WYN_S/(time(end)-time(1));
-    wyn.histogram = histogramN;
+    % wyn.histogram = histogramN;
     wyn.t_hist = tHist;
     
 end
