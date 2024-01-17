@@ -31,10 +31,11 @@ nazwa_struktury=append("record_",replace(replace(replace(erase(nazwa_pliku,'.mat
 % 6. 120 sekund 0.7 Hz zaklocen
 % 7. 60  sekund 1.4 Hz zaklocen
 % 8. 120 sekund 1.4 Hz zaklocen
+numer_badania=6;
 
-x=dane.(nazwa_struktury).movements(4).sources.signals.signal_18.data(1).data';
-y=dane.(nazwa_struktury).movements(4).sources.signals.signal_18.data(2).data';
-fp=dane.(nazwa_struktury).movements(4).sources.signals.signal_18.frequency;
-t=0:(1/fp):double(dane.(nazwa_struktury).movements(4).sources.signals.signal_18.count-1)*(1/fp);
+x=dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(1).data';
+y=dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(2).data';
+fp=dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.frequency;
+t=0:(1/fp):double(dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.count-1)*(1/fp);
 
 end
