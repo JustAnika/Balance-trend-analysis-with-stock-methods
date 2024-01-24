@@ -17,7 +17,7 @@ function [x, y, t, fp] = wczytanie_danych(sciezka_do_pliku, nazwa_pliku)
 % oraz dowolna pojedyncza wartosc czestotliwosci probkowania.
 
 % wczytanie pliku
-dane = load(append(sciezka_do_pliku,nazwa_pliku)); 
+dane = load(append(sciezka_do_pliku,nazwa_pliku));
 
 % nazwa struktury specyficzna do badan z listopada 2023
 nazwa_struktury = append("record_",replace(replace(replace(erase(nazwa_pliku,'.mat'),' ','_'),'ś','_'),'-','_')); 
@@ -41,9 +41,44 @@ nazwa_struktury = append("record_",replace(replace(replace(erase(nazwa_pliku,'.m
 
 numer_badania = 6;
 
-x = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(1).data';
-y = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(2).data';
-fp = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.frequency;
-t = 0:(1/fp):double(dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.count-1)*(1/fp);
+% odczytanie plików z danymi  w formacie ".mat"
+if extractAfter(nazwa_pliku,'.') == "mat"
+    % odczytanie struktur z badań, które zlały się w jedno nagranie
+    if size(dane.(nazwa_struktury).movements,2) == 1
+        x_all = dane.(nazwa_struktury).movements(1).sources.signals.signal_18.data(1).data';
+        y_all = dane.(nazwa_struktury).movements(1).sources.signals.signal_18.data(2).data';
+        fp = dane.(nazwa_struktury).movements(1).sources.signals.signal_18.frequency;
+        t_all = 0:(1/fp):double(dane.(nazwa_struktury).movements(1).sources.signals.signal_18.count-1)*(1/fp);
+        number=1;
+        for i=1:2:size(dane.(nazwa_struktury).movements(1).markers,2)
+            if i==15
+                data.("badanie"+number).x=x_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:end);
+                data.("badanie"+number).y=y_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:end);
+                data.("badanie"+number).t=t_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:end)-dane.(nazwa_struktury).movements(1).markers(i).time +1;
+            else
+                data.("badanie"+number).x=x_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:(dane.(nazwa_struktury).movements(1).markers(i+1).time)*fp);
+                data.("badanie"+number).y=y_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:(dane.(nazwa_struktury).movements(1).markers(i+1).time)*fp );
+                data.("badanie"+number).t=t_all((dane.(nazwa_struktury).movements(1).markers(i).time +1)*fp:(dane.(nazwa_struktury).movements(1).markers(i+1).time)*fp )-dane.(nazwa_struktury).movements(1).markers(i).time +1;
+                number = number+1;
+            end
+        end
+        x=data.("badanie"+numer_badania).x;
+        y=data.("badanie"+numer_badania).y;
+        t=data.("badanie"+numer_badania).t;
+    else
+        % odczytanie danych ze struktur 
+        x = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(1).data';
+        y = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.data(2).data';
+        fp = dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.frequency;
+        t = 0:(1/fp):double(dane.(nazwa_struktury).movements(numer_badania).sources.signals.signal_18.count-1)*(1/fp);
+    end 
+% wczytanie plików txt
+elseif extractAfter(nazwa_pliku,'.') == "txt"
+    dane = load("C:\Users\dadus\Documents\Uczelnia\sem.2\PBL\dane\Parkinson\PD II\OO\BPig_OO_1_COP.txt");
+    x=dane(:,1)';
+    y=dane(:,2)';
+    fp=100;
+    t=0:1/fp:(size(x,2)-1)*1/fp;
+end
 
 end
