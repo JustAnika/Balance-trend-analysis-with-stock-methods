@@ -74,7 +74,6 @@ if extractAfter(nazwa_pliku,'.') == "mat"
     end 
 % wczytanie plików txt
 elseif extractAfter(nazwa_pliku,'.') == "txt"
-    dane = load("C:\Users\dadus\Documents\Uczelnia\sem.2\PBL\dane\Parkinson\PD II\OO\BPig_OO_1_COP.txt");
     x=dane(:,1)';
     y=dane(:,2)';
     fp=100;
